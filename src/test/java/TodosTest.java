@@ -6,8 +6,10 @@ public class TodosTest {
     @Test
     public void shouldAddThreeTasksOfDifferentType() {
         SimpleTask simpleTask = new SimpleTask(5, "Позвонить родителям");
+
         String[] subtasks = { "Молоко", "Яйца", "Хлеб" };
         Epic epic = new Epic(55, subtasks);
+
         Meeting meeting = new Meeting(
                 555,
                 "Выкатка 3й версии приложения",
@@ -16,6 +18,7 @@ public class TodosTest {
         );
 
         Todos todos = new Todos();
+
         todos.add(simpleTask);
         todos.add(epic);
         todos.add(meeting);
@@ -25,49 +28,58 @@ public class TodosTest {
         Assertions.assertArrayEquals(expected, actual);
     }
 
+    // 1. Находится несколько задач
     @Test
-    public void shouldFindTasksByQuery() {
-        SimpleTask simpleTask = new SimpleTask(5, "Позвонить родителям");
-        String[] subtasks = { "Молоко", "Яйца", "Хлеб" };
-        Epic epic = new Epic(55, subtasks);
-        Meeting meeting = new Meeting(
-                555,
-                "Выкатка 3й версии приложения",
-                "Приложение НетоБанка",
-                "Во вторник после обеда"
-        );
+    public void shouldFindMultipleTasksByQuery() {
+        // Создаем задачи так, чтобы слово "Купить" встречалось в двух из них
+        SimpleTask simpleTask = new SimpleTask(1, "Купить хлеб");
+        Epic epic = new Epic(2, new String[]{"Купить молоко", "Яйца", "Сыр"});
+        Meeting meeting = new Meeting(3, "Встреча", "Проект", "Завтра");
 
         Todos todos = new Todos();
         todos.add(simpleTask);
         todos.add(epic);
         todos.add(meeting);
 
-        // 1. Поиск по слову "Позвонить" (должен найтись simpleTask)
-        Task[] expected1 = { simpleTask };
-        Task[] actual1 = todos.search("Позвонить");
-        Assertions.assertArrayEquals(expected1, actual1);
+        Task[] expected = { simpleTask, epic };
+        Task[] actual = todos.search("Купить");
 
-        // 2. Поиск по слову "Хлеб" (должен найтись epic)
-        Task[] expected2 = { epic };
-        Task[] actual2 = todos.search("Хлеб");
-        Assertions.assertArrayEquals(expected2, actual2);
-
-        // 3. Поиск по слову "НетоБанка" (должен найтись meeting)
-        Task[] expected3 = { meeting };
-        Task[] actual3 = todos.search("НетоБанка");
-        Assertions.assertArrayEquals(expected3, actual3);
-
-        // 4. Поиск по слову, которого нет (должен быть пустой массив)
-        Task[] expected4 = {};
-        Task[] actual4 = todos.search("Самолет");
-        Assertions.assertArrayEquals(expected4, actual4);
+        Assertions.assertArrayEquals(expected, actual);
     }
 
+    // 2. Находится ровно одна задача
     @Test
-    public void shouldReturnEmptyArrayWhenSearchingInEmptyTodos() {
+    public void shouldFindExactlyOneTaskByQuery() {
+        SimpleTask simpleTask = new SimpleTask(1, "Позвонить маме");
+        Epic epic = new Epic(2, new String[]{"Молоко", "Хлеб"});
+        Meeting meeting = new Meeting(3, "Обсуждение", "Проект", "Завтра");
+
         Todos todos = new Todos();
+        todos.add(simpleTask);
+        todos.add(epic);
+        todos.add(meeting);
+
+        Task[] expected = { simpleTask };
+        Task[] actual = todos.search("маме");
+
+        Assertions.assertArrayEquals(expected, actual);
+    }
+
+    // 3. Находится 0 задач (ни одна не подходит)
+    @Test
+    public void shouldFindNoTasksWhenQueryDoesNotMatch() {
+        SimpleTask simpleTask = new SimpleTask(1, "Позвонить маме");
+        Epic epic = new Epic(2, new String[]{"Молоко", "Хлеб"});
+        Meeting meeting = new Meeting(3, "Обсуждение", "Проект", "Завтра");
+
+        Todos todos = new Todos();
+        todos.add(simpleTask);
+        todos.add(epic);
+        todos.add(meeting);
+
         Task[] expected = {};
-        Task[] actual = todos.search("Любой запрос");
+        Task[] actual = todos.search("Самолет");
+
         Assertions.assertArrayEquals(expected, actual);
     }
 }
